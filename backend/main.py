@@ -12,6 +12,12 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine) 
 Base = declarative_base()
 
+class User(Base):
+  __tablename__ = "users"
+  id = Column(Integer, primary_key=True, index=True)
+  username = Column(String, unique=True, index=True, nullable=False)
+  hashed_password = Column(String, nullable=False)
+
 class Item(Base):
   __tablename__ = "items"
   id = Column(Integer, primary_key=True, index=True)
