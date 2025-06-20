@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, Query
-from sqlalchemy import create_engine, Column, Integer, String, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, relationship
 from pydantic import BaseModel
 from typing import Optional
 
@@ -18,12 +18,18 @@ class User(Base):
   username = Column(String, unique=True, index=True, nullable=False)
   hashed_password = Column(String, nullable=False)
 
+  items = relationship("Item", back_populates="owner")
+
+
 class Item(Base):
   __tablename__ = "items"
   id = Column(Integer, primary_key=True, index=True)
   name = Column(String, index=True)
   description = Column(String)
   complete = Column(Boolean, default=False, nullable=False)
+
+  owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+  owner = relationship("User", back_populates="items")
 
 
 class ItemCreate(BaseModel):
@@ -74,7 +80,7 @@ async def read_all_items(complete: Optional[bool] = Query(None), name: Optional[
       query = query.filter(Item.complete == complete)
    if name is not None:
       query = query.filter(Item.name == name)
-   return query
+   return query.all()
 
 @app.delete("/items/{item_id}", response_model=ItemResponse)
 async def delete_item(item_id: int, db: Session = Depends(get_db)):
