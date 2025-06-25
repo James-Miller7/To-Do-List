@@ -6,7 +6,17 @@ from typing import Optional
 from auth import hash_password, verify_password, create_access_token, decode_access_token, get_current_user
 from models import User, UserCreate, UserResponse, Item, ItemCreate, ItemResponse, ItemPatch, Base
 from database import engine, get_db
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 Base.metadata.create_all(bind=engine)
 
