@@ -21,13 +21,13 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 @app.post("/signup/", response_model=UserResponse)
-async def create_user(user: UserCreate, db: Session = Depends(get_db)):
-   exsisting_user = db.query(User).filter(User.username == user.username).first()
+async def create_user(username: str = Form(...),  password: str = Form(...), db: Session = Depends(get_db)):
+   exsisting_user = db.query(User).filter(User.username == username).first()
    if exsisting_user:
       raise HTTPException(status_code=400, detail="Username already taken")
    
-   hashed_password = hash_password(user.password)
-   new_user = User(username = user.username, hashed_password = hashed_password)
+   hashed_password = hash_password(password)
+   new_user = User(username = username, hashed_password = hashed_password)
 
    db.add(new_user)
    db.commit()
